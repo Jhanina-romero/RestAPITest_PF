@@ -1,3 +1,5 @@
+package test;
+
 import com.github.fge.jsonschema.SchemaVersion;
 import com.github.fge.jsonschema.cfg.ValidationConfiguration;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
