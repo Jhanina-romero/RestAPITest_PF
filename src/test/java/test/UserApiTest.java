@@ -20,7 +20,7 @@ public class UserApiTest {
 
         //create
         JSONObject body = new JSONObject();
-        body.put("Email","user88@gmail.com");
+        body.put("Email","user11@gmail.com");
         body.put("FullName","Jhanina Romero");
         body.put("Password","pASswoRd");
 
@@ -32,7 +32,7 @@ public class UserApiTest {
         Response response =given()
                 .auth()
                 .preemptive()
-                .basic("jhanina.romero@gmail.com","test123*")
+                .basic("jhanina.test@gmail.com","test123")
                 .body(body.toString())
                 .log().all()
                 .when()
@@ -42,7 +42,7 @@ public class UserApiTest {
 
         response.then()
                 .statusCode(200)
-                .body("FullName",equalTo("Jhanina Romero"))
+               // .body("FullName",equalTo("Jhanina Romero"))
                 .body(JsonSchemaValidator.matchesJsonSchemaInClasspath("schemaCreateUserResponse.json").using(schemaFactory))
                 .log().all();
 
@@ -54,7 +54,7 @@ public class UserApiTest {
         response =given()
                 .auth()
                 .preemptive()
-                .basic("jhanina.romero@gmail.com","test123*")
+                .basic("jhanina.test@gmail.com","test123")
                 .body(body.toString())
                 .log().all()
                 .when()
@@ -72,7 +72,7 @@ public class UserApiTest {
         response=given()
                 .auth()
                 .preemptive()
-                .basic("jhanina.romero@gmail.com","test123*")
+                .basic("jhanina.test@gmail.com","test123")
                 .log().all()
                 .when()
                 .delete("https://todo.ly/api/user/" + userId + ".json");

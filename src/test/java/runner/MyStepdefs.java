@@ -12,47 +12,60 @@ import io.restassured.response.Response;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+
+import static org.hamcrest.CoreMatchers.equalTo;
 
 public class MyStepdefs {
     Response response;
     RequestInfo requestInfo=new RequestInfo();
     Map<String,String> variables = new HashMap<>();
 
-    @Given("using basic authentication in todo.ly")
-    public void usingBasicAuthenticationInTodoLy() {
+    @Given("using token in todo.ly")
+    public void usingTokenInTodoLy() {
         String credentials = Base64.getEncoder()
                 .encodeToString((Configuration.email + ":" + Configuration.password).getBytes());
 
-        requestInfo.setUrl(Configuration.host+"/api/authentication/token.json")
-                .setHeader("Authorization","Basic "+credentials);
+        requestInfo.setUrl(Configuration.host + "/api/authentication/token.json")
+                .setHeader("Authorization","Basic " + credentials);
         response = FactoryRequest.make("get").send(requestInfo);
-        // get token
+
         String token = response.then().extract().path("TokenString");
         requestInfo = new RequestInfo();
-        requestInfo.setHeader("Token",token);
+        requestInfo.setHeader("Token", token);
     }
 
-    @When("send POST request {string} with body")
-    public void sendPOSTRequestWithBody(String arg0) {
+    @When("send the {} request {string} with body")
+    public void sendThePOSTRequestWithBody(String method,String url,String body) {
+        String email= generatedEmail();
+        requestInfo.setUrl(Configuration.host + this.replaceValues(url))
+                .setBody(body.replace("<random_email>", email));
+        response = FactoryRequest.make(method).send(requestInfo);
     }
 
-    @Then("response code should be {int}")
-    public void responseCodeShouldBe(int arg0) {
+    @Then("the response code should be {int}")
+    public void theResponseCodeShouldBe(int expectedCode) {
+        response.then().statusCode(expectedCode);
     }
 
-    @And("the attribute {string} should be {string}")
-    public void theAttributeShouldBe(String arg0, String arg1) {
+    @And("the attribute for {string} should be {string}")
+    public void theAttributeForShouldBe(String attribute, String expectedValue) {
+        response.then().body(attribute, equalTo(expectedValue));
     }
 
-    @And("save {string} in the variable {string}")
-    public void saveInTheVariable(String arg0, String arg1) {
+    @And("save the {string} in the variable {string}")
+    public void saveTheInTheVariable(String attribute, String nameVariable) {
+        variables.put(nameVariable,response.then().extract().path(attribute) + "");
     }
 
-    @When("send PUT request {string} with body")
-    public void sendPUTRequestWithBody(String arg0) {
+    private String replaceValues(String value){
+        for (String key:variables.keySet() ) {
+            value=value.replace(key,variables.get(key));
+        }
+        return value;
     }
 
-    @When("send DELETE request {string} with body")
-    public void sendDELETERequestWithBody(String arg0) {
+    private String generatedEmail() {
+        return "user" + UUID.randomUUID().toString().substring(0, 8) + "@example.com";
     }
 }
